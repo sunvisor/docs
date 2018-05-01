@@ -1,25 +1,23 @@
 # Filters
 
-API Platform Core provides a generic system to apply filters on collections. Useful filters for the Doctrine ORM are provided
-with the library. You can also create custom filters that would fit your specific needs.
-You can also add filtering support to your custom [data providers](data-providers.md) by implementing interfaces provided
-by the library.
+API Platform Coreは、コレクションにフィルタを適用するための汎用システムを提供します。
+Doctrine ORMの便利なフィルタは、ライブラリに付属しています。
+特定のニーズに合わせたカスタムフィルタを作成することもできます。
+また、ライブラリが提供するインターフェイスを実装することで、カスタム[データプロバイダ](data-providers.md)にフィルタリングサポートを追加することもできます。
 
-By default, all filters are disabled. They must be enabled explicitly.
+デフォルトでは、すべてのフィルタが無効になっています。 明示的に有効にする必要があります。
 
-When a filter is enabled, it is automatically documented as a `hydra:search` property in the collection response. It also
-automatically appears in the [NelmioApiDoc documentation](nelmio-api-doc.md) if it is available.
+フィルタが有効になると、コレクション レスポンスの `hydra:search` プロパティとして自動的に文書化されます。 また、[NelmioApiDocのマニュアル](nelmio-api-doc.md) が利用可能であれば自動的に表示されます。
+
 
 ## Doctrine ORM Filters
 
-### Basic Knowledge
+### 基礎知識
 
-Filters are services (see the section on [custom filters](#creating-custom-filters)), and they can be linked
-to a Resource in two ways:
+フィルタはサービスです（[カスタムフィルタ](#creating-custom-filters)のセクションを参照）。これらのフィルタは2つの方法でリソースにリンクできます。
 
-1. Through the `ApiResource` declaration, as the `filters` attribute.
-
-For example having a filter service declaration:
+1.  `ApiResource` 宣言を介して、`filters` 属性として。
+たとえば、次のフィルタサービス宣言があるとします。
 
 ```yaml
 # api/config/services.yaml
@@ -36,7 +34,7 @@ services:
         public: false
 ```
 
-We're linking the filter `offer.date_filter` with the `@ApiResource` annotation:
+`offer.date_filter` フィルタを `@ApiResource` アノテーションでリンクしています、
 
 ```php
 <?php
@@ -55,7 +53,7 @@ class Offer
 }
 ```
 
-Alternatively, using YAML:
+または、YAML を使うと、
 
 ```yaml
 # api/config/api_platform/resources.yaml
@@ -66,7 +64,7 @@ App\Entity\Offer:
     # ...
 ```
 
-Or XML:
+XML では、
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -89,9 +87,9 @@ Or XML:
 </resources>
 ```
 
-2. By using the `@ApiFilter` annotation.
+2. `@ApiFilter` アノテーションを使って
 
-This annotation automatically declares the service, and you just have to use the filter class you want:
+このアノテーションは自動的にサービスを宣言し、必要なフィルタクラスを使用するだけです。
 
 ```php
 <?php
@@ -113,30 +111,29 @@ class Offer
 }
 ```
 
-Learn more on how the [ApiFilter annotation](filters.md#apifilter-annotation) works.
+[ApiFilterアノテーション](filters.md#apifilter-annotation)の仕組みについて詳しくは、こちらをご覧ください。
 
-For the sake of consistency, we're using the annotation in the below documentation.
+一貫性を保つため、以下のドキュメントではアノテーションを使用しています。
 
 ### Search Filter
 
-If Doctrine ORM support is enabled, adding filters is as easy as registering a filter service in the `api/config/services.yaml`
-file and adding an attribute to your resource configuration.
+Doctrine ORMサポートが有効になっている場合、フィルターを追加するのは `api/config/services.yaml`にフィルターサービスを登録するのと同じくらい簡単です
 
 The search filter supports `exact`, `partial`, `start`, `end`, and `word_start` matching strategies:
+検索フィルタは `exact`、`partial`、 `start`、`end`、 `word_start` のマッチング戦略をサポートしています：
 
-* `partial` strategy uses `LIKE %text%` to search for fields that containing the text.
-* `start` strategy uses `LIKE text%` to search for fields that starts with text.
-* `end` strategy uses `LIKE %text` to search for fields that ends with text.
-* `word_start` strategy uses `LIKE text% OR LIKE % text%` to search for fields that contains the word starting with `text`.
+* `partial`戦略は`LIKE％text％ `を使ってテキストを含むフィールドを検索します。
+* `start`戦略は`LIKE text％ `を使ってテキストで始まるフィールドを検索します。
+* `end`戦略は`LIKE％text`を使ってテキストで終わるフィールドを検索します。
+* `word_start`戦略は` LIKE text％OR LIKE％text％ `を使用して、` text`で始まる単語を含むフィールドを検索します。
 
-Prepend the letter `i` to the filter if you want it to be case insensitive. For example `ipartial` or `iexact`. Note that
-this will use the `LOWER` function and **will** impact performance [if there is no proper index](performance.md#search-filter).
+大文字小文字を区別しないようにするには、フィルタに文字「i」を付加します。 たとえば `ipartial`や` iexact`などです。
+これは `LOWER` 関数を使用し、[適切なインデックスがない場合](performance.md#search-filter)はパフォーマンスに影響を与えることがあることに注意してください。
 
-Case insensitivity may already be enforced at the database level depending on the [collation](https://en.wikipedia.org/wiki/Collation)
-used. If you are using MySQL, note that the commonly used `utf8_unicode_ci` collation (and its sibling `utf8mb4_unicode_ci`)
-are already case insensitive, as indicated by the `_ci` part in their names.
+大文字と小文字の区別は、使用されている[照合順序(Collation)](https://en.wikipedia.org/wiki/Collation)に応じてデータベースレベルで既に適用されている可能性があります。
+MySQLを使用している場合、一般に使用される `utf8_unicode_ci`照合（およびその兄弟の` utf8mb4_unicode_ci`）は、名前に `_ci`部分で示されるように、大文字と小文字を区別しないことに注意してください。
 
-In the following example, we will see how to allow the filtering of a list of e-commerce offers:
+次の例では、eコマース注文リストのフィルタリングをする方法を見ていきます。
 
 ```php
 <?php
@@ -158,12 +155,13 @@ class Offer
 }
 ```
 
-`http://localhost:8000/api/offers?price=10` will return all offers with a price being exactly `10`.
-`http://localhost:8000/api/offers?name=shirt` will return all offers with a description containing the word "shirt".
+`http://localhost:8000/api/offers?price=10`は価格が正確に`10`であるすべてのオファーを返します。
+`http：// localhost：8000 / api / offers？name = shirt`は、単語" shirt "を含むすべての注文を返します。
 
-Filters can be combined together: `http://localhost:8000/api/offers?price=10&name=shirt`
 
-It is possible to filter on relations too, if `Offer` has a `Product` relation:
+フィルターは組み合わせて使えます: `http://localhost:8000/api/offers?price=10&name=shirt`
+
+リレーションについてもフィルタリングすることは可能です、`Offer` が `Product` を所有している時、
 
 ```php
 <?php
@@ -183,23 +181,26 @@ class Offer
 }
 ```
 
-With this service definition, it is possible to find all offers belonging to the product identified by a given IRI.
-Try the following: `http://localhost:8000/api/offers?product=/api/products/12`
-Using a numeric ID is also supported: `http://localhost:8000/api/offers?product=12`
+このサービス定義では、特定のIRIによって特定された製品に属するすべての注文を見つけることができます。
+`http://localhost:8000/api/offers?product=/api/products/12` を試してください。
+`http://localhost:8000/api/offers?product=12` のように数値ID も使えます。
 
-Previous URLs will return all offers for the product having the following IRI as JSON-LD identifier (`@id`): `http://localhost:8000/api/products/12`.
+前のURLでは、JSON-LD識別子として次のIRIを持つ製品のすべての注文を返します
+(`@id`): `http://localhost:8000/api/products/12`.
 
 ### Date Filter
 
-The date filter allows for filtering a collection by date intervals.
+日付フィルタを使用すると、日付間隔でコレクションをフィルタリングできます。
 
-Syntax: `?property[<after|before|strictly_after|strictly_before>]=value`
+文法: `?property[<after|before|strictly_after|strictly_before>]=value`
 
-The value can take any date format supported by the [`\DateTime` constructor](http://php.net/manual/en/datetime.construct.php).
+この値は、
+[`\DateTime` constructor](http://php.net/manual/en/datetime.construct.php).
+でサポートされている任意の日付形式を使うことができます。
 
-The `after` and `before` filters will filter including the value whereas `strictly_after` and `strictly_before` will filter excluding the value.
+`after`と` before` フィルタは値を含めてフィルタリングしますが、 `strictly_after`と` strictly_before` は値を除外してフィルタリングします。
 
-As others filters, the date filter must be explicitly enabled:
+他のフィルタリングをするときに、日付フィルタを明示的に有効にする必要があります。
 
 ```php
 <?php
@@ -221,23 +222,23 @@ class Offer
 }
 ```
 
-Given that the collection endpoint is `/offers`, you can filter offers by date with the following query: `/offers?createdAt[after]=2018-03-19`.
-
 It will return all offers where `createdAt` is superior or equal to `2018-03-19`.
+`createdAt` が `2018-03-19` よりも後か等しいすべての注文を返します。
 
-#### Managing `null` Values
+#### `null` 値を扱う
 
-The date filter is able to deal with date properties having `null` values.
-Four behaviors are available at the property level of the filter:
+date フィルタは、`null` 値を有する日付プロパティを扱うことができます。
+フィルタのプロパティレベルでは、次の4つの動作を使用できます。
 
-Description                          | Strategy to set
+
+説明                                | セットする Strategy
 -------------------------------------|------------------------------------------------------------------------------------
-Use the default behavior of the DBMS | `null`
-Exclude items                        | `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter::EXCLUDE_NULL` (`exclude_null`)
-Consider items as oldest             | `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter::INCLUDE_NULL_BEFORE` (`include_null_before`)
-Consider items as youngest           | `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter::INCLUDE_NULL_AFTER` (`include_null_after`)
+DBMS の規定の動作を使う             | `null`
+アイテムを除外する                  | `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter::EXCLUDE_NULL` (`exclude_null`)
+アイテムを最も古いと扱う            | `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter::INCLUDE_NULL_BEFORE` (`include_null_before`)
+アイテムを最も新しいと扱う          | `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter::INCLUDE_NULL_AFTER` (`include_null_after`)
 
-For instance, exclude entries with a property value of `null`, with the following service definition:
+たとえば、次のサービス定義を使用すると、プロパティ値が `null` のエントリを除外します。
 
 ```php
 <?php
@@ -261,11 +262,11 @@ class Offer
 
 ### Boolean Filter
 
-The boolean filter allows you to search on boolean fields and values.
+Boolean フィルタでは、Boolean 値のフィールドと値を検索できます。
 
-Syntax: `?property=<true|false|1|0>`
+文法: `?property=<true|false|1|0>`
 
-Enable the filter:
+フィルターを有効にするには次のようにします
 
 ```php
 <?php
@@ -287,17 +288,17 @@ class Offer
 }
 ```
 
-Given that the collection endpoint is `/offers`, you can filter offers by boolean with the following query: `/offers?isAvailableGenericallyInMyCountry=true`.
+コレクションのエンドポイントが `/offers` であるとすると、`/offers?isAvailableGenericallyInMyCountry=true` というクエリでブール値で注文をフィルタリングできます。
 
-It will return all offers where `isAvailableGenericallyInMyCountry` equals `true`.
+`isAvailableGenericallyInMyCountry` が `true` である注文が返されます。
 
 ### Numeric Filter
 
-The numeric filter allows you to search on numeric fields and values.
+数値フィルタを使用すると、数値フィールドと値を検索できます。
 
-Syntax: `?property=<int|bigint|decimal...>`
+文法: `?property=<int|bigint|decimal...>`
 
-Enable the filter:
+フィルターを有効にするには次のようにします
 
 ```php
 <?php
@@ -319,17 +320,17 @@ class Offer
 }
 ```
 
-Given that the collection endpoint is `/offers`, you can filter offers by boolean with the following query: `/offers?sold=1`.
+コレクションのエンドポイントが `/offers` であるとすると、`/offers?sold=1` というクエリでブール値でオファーをフィルタリングできます。
 
-It will return all offers with `sold` equals `1`.
+`sold` が `1` の注文が返されます。
 
 ### Range Filter
 
-The range filter allows you to filter by a value Lower than, Greater than, Lower than or equal, Greater than or equal and between two values.
+範囲フィルタを使用すると、より小さい、より大きい、以下、以上、および2つの値の間の値でフィルタリングできます。
 
-Syntax: `?property[<lt|gt|lte|gte|between>]=value`
+文法: `?property[<lt|gt|lte|gte|between>]=value`
 
-Enable the filter:
+フィルターを有効にするには次のようにします
 
 ```php
 <?php
@@ -352,18 +353,19 @@ class Offer
 ```
 
 Given that the collection endpoint is `/offers`, you can filters the price with the following query: `/offers?price[between]=12.99..15.99`.
+コレクションのエンドポイントが `/offers` であるとすれば、`/offers?price[between]=12.99..15.99` というクエリで価格をフィルタリングできます。
 
-It will return all offers with `price` between 12.99 and 15.99.
+`price` が 12.99 から 15.99 までの注文を返します。
 
-You can filter offers by joining two values, for example: `/offers?price[gt]=12.99&price[lt]=19.99`.
+2つの値をつなげて注文をフィルタリングできます。例えば: `/offers?price[gt]=12.99&price[lt]=19.99`
 
 ### Exists Filter
 
-The exists filter allows you to select items based on nullable field value.
+存在フィルタを使用すると、null可能なフィールド値に基づいて項目を選択できます。
 
-Syntax: `?property[exists]=<true|false|1|0>`
+文法: `?property[exists]=<true|false|1|0>`
 
-Enable the filter:
+フィルターを有効にするには次のようにします
 
 ```php
 <?php
@@ -385,17 +387,18 @@ class Offer
 }
 ```
 
-Given that the collection endpoint is `/offers`, you can filter offers on nullable field with the following query: `/offers?transportFees[exists]=true`.
+コレクションのエンドポイントが `/offers` であるとすれば、`/offers?transportFees[exists]=true` というクエリでヌル可能フィールドの注文をフィルタリングできます。
 
-It will return all offers where `transportFees` is not `null`.
+It will return all offers where 
+`transportFees` が `null` ではない注文を返します。
 
-### Order Filter (Sorting)
+### Order Filter (ソート)
 
-The order filter allows to sort a collection against the given properties.
+順序フィルタを使用すると、指定されたプロパティに対してコレクションをソートできます。
 
-Syntax: `?order[property]=<asc|desc>`
+文法: `?order[property]=<asc|desc>`
 
-Enable the filter:
+フィルターを有効にするには次のようにします
 
 ```php
 <?php
@@ -417,11 +420,9 @@ class Offer
 }
 ```
 
-Given that the collection endpoint is `/offers`, you can filter offers by name in ascending order and then by ID in descending
-order with the following query: `/offers?order[name]=desc&order[id]=asc`.
+コレクションのエンドポイントが `/offers`　であるとするとば、注文を名前順に昇順に、次にIDを降順に並べ替えることができます： `/offers?order[name]=desc&order[id]=asc`
 
-By default, whenever the query does not specify the direction explicitly (e.g: `/offers?order[name]&order[id]`), filters
-will not be applied unless you configure a default order direction to use:
+デフォルトでは、クエリが方向を明示的に指定していない場合（たとえば、`/offers?order[name]&order[id]`）、デフォルトの指示方向を使用するように設定しない限り、フィルタは適用されません。
 
 ```php
 <?php
@@ -443,18 +444,17 @@ class Offer
 }
 ```
 
-#### Comparing with Null Values
+#### Null 値との比較
 
-When the property used for ordering can contain `null` values, you may want to specify how `null` values are treated in
-the comparison:
+順序付けに使用されるプロパティーに `null`値が含まれる場合、` null`値がどのように扱われるかを指定することができます
 
-Description                          | Strategy to set
--------------------------------------|---------------------------------------------------------------------------------------------
-Use the default behavior of the DBMS | `null`
-Consider items as smallest           | `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter::NULLS_SMALLEST` (`nulls_smallest`)
-Consider items as largest            | `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter::NULLS_LARGEST` (`nulls_largest`)
+説明                            | セットする Strategy
+--------------------------------|---------------------------------------------------------------------------------------
+DBMS の規定の動作を使う         | `null`
+アイテムを最小として扱う        | `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter::NULLS_SMALLEST` (`nulls_smallest`)
+アイテムを最大として扱う        | `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter::NULLS_LARGEST` (`nulls_largest`)
 
-For instance, treat entries with a property value of `null` as the smallest, with the following service definition:
+例えば、次のサービス定義を使用して、プロパティ値が `null` のエントリを最小値として扱います。
 
 
 ```php
@@ -477,10 +477,10 @@ class Offer
 }
 ```
 
-#### Using a Custom Order Query Parameter Name
+#### カスタムオーダークエリパラメータ名の使用
 
-A conflict will occur if `order` is also the name of a property with the search filter enabled.
-Luckily, the query parameter name to use is configurable:
+`order` が検索フィルタが有効になっているプロパティの名前でもある場合、競合が発生します。
+幸いにも、使用するクエリパラメータ名は設定可能です：
 
 ```yaml
 # api/config/packages/api_platform.yaml
@@ -489,10 +489,10 @@ api_platform:
         order_parameter_name: '_order' # the URL query parameter to use is now "_order"
 ```
 
-### Filtering on Nested Properties
+### ネストされたプロパティのフィルタリング
 
-Sometimes, you need to be able to perform filtering based on some linked resources (on the other side of a relation). All
-built-in filters support nested properties using the dot (`.`) syntax, e.g.:
+場合によっては、いくつかのリンクされたリソース（リレーションの反対側）に基づいてフィルタリングを実行できる必要があります。
+次のように、すべてのビルトインフィルタは、ドット（`.`）構文を使用してネストされたプロパティをサポートします。
 
 ```php
 <?php
@@ -516,14 +516,14 @@ class Offer
 }
 ```
 
-The above allows you to find offers by their respective product's color: `http://localhost:8000/api/offers?product.color=red`,
-or order offers by the product's release date: `http://localhost:8000/api/offers?order[product.releaseDate]=desc`
+上記のようすると、それぞれの製品の色で注文を見つけることができます： `http://localhost:8000/api/offers?product.color=red`
+または製品のリリース日で注文を並べ替えます
+`http://localhost:8000/api/offers?order[product.releaseDate]=desc`
 
-### Enabling a Filter for All Properties of a Resource
+### リソースのすべてのプロパティのフィルタを有効にする
 
-As we have seen in previous examples, properties where filters can be applied must be explicitly declared. If you don't
-care about security and performance (e.g. an API with restricted access), it is also possible to enable built-in filters
-for all properties:
+前の例で見たように、フィルタを適用できるプロパティは明示的に宣言する必要があります。
+セキュリティとパフォーマンス（アクセスが制限されているAPIなど）を気にかけない場合は、すべてのプロパティに組み込みのフィルタを有効にすることもできます。
 
 ```php
 <?php
@@ -545,30 +545,30 @@ class Offer
 }
 ```
 
-**Note: Filters on nested properties must still be enabled explicitly, in order to keep things sane**
+**注意：ネストされたプロパティのフィルタは明示的に有効にする必要があります。**
 
-Regardless of this option, filters can by applied on a property only if:
+このオプションに関係なく、フィルタは次の場合にのみプロパティに適用できます。
 
-* the property exists
-* the value is supported (ex: `asc` or `desc` for the order filters).
+* そのプロパティが存在する
+* その値がサポートされている (例: order フィルターにおける `asc` や `desc`）
 
-It means that the filter will be **silently** ignored if the property:
+これは、プロパティが次の場合、フィルタが**暗黙**で無視されることを意味します。
 
-* does not exist
-* is not enabled
-* has an invalid value
+* 存在しない
+* 有効でない
+* 不正な値を持つ
 
 ## Serializer Filters
 
 ### Group Filter
 
-The group filter allows you to filter by serialization groups.
+グループフィルタを使用すると、シリアライゼーショングループをフィルタリングできます。
 
-Syntax: `?groups[]=<group>`
+文法: `?groups[]=<group>`
 
-You can add as many groups as you need.
+必要な数のグループを追加できます。
 
-Enable the filter:
+フィルターを有効にするには次のようにします
 
 ```php
 <?php
@@ -591,22 +591,22 @@ class Book
 }
 ```
 
-Three arguments are available to configure the filter:
-- `parameterName` is the query parameter name (default `groups`)
-- `overrideDefaultGroups` allows to override the default serialization groups (default `false`)
-- `whitelist` groups whitelist to avoid uncontrolled data exposure (default `null` to allow all groups)
+フィルターを設定する3つの引数が使えます。
+- `parameterName` はクエリー パラメーターの名前です (デフォルトは `groups`)
+- `overrideDefaultGroups` で既定のシリアル化グループをオーバーライドできます (デフォルトは `false`)
+- `whitelist` 管理されていないデータエクスポージャーを避けるためのホワイトリストグループ (デフォルトは `null` で全てのグループを有効にします)
 
-Given that the collection endpoint is `/books`, you can filter by serialization groups with the following query: `/books?groups[]=read&groups[]=write`.
+コレクションのエンドポイントが `/books` である場合、`/books?groups[]=read&groups[]=write` というクエリを使ってシリアライズ グループをフィルタリングすることができます。
 
 ### Property filter
 
-The property filter adds the possibility to select the properties to serialize (sparse fieldsets).
+プロパティフィルタは、シリアル化するプロパティを選択する可能性を追加します（まばらなフィールドセット）。
 
-Syntax: `?properties[]=<property>&properties[<relation>]=<property>`
+文法: `?properties[]=<property>&properties[<relation>]=<property>`
 
-You can add as many properties as you need.
+必要な数のプロパティを追加できます。
 
-Enable the filter:
+フィルターを有効にするには次のようにします
 
 ```php
 <?php
@@ -629,35 +629,39 @@ class Book
 }
 ```
 
-Three arguments are available to configure the filter:
-- `parameterName` is the query parameter name (default `properties`)
-- `overrideDefaultProperties` allows to override the default serialization properties (default `false`)
-- `whitelist` properties whitelist to avoid uncontrolled data exposure (default `null` to allow all properties)
+フィルターを設定する3つの引数が使えます。
+- `parameterName` はクエリー パラメーターの名前です (デフォルトは `groups`)
+- `overrideDefaultGroups` で既定のシリアル化グループをオーバーライドできます (デフォルトは `false`)
+- `whitelist` 管理されていないデータの暴露を避けるためのホワイトリストのプロパティ (デフォルトは `null` で全てのプロパティを有効にします)
 
 Given that the collection endpoint is `/books`, you can filter the serialization properties with the following query: `/books?properties[]=title&properties[]=author`.
-If you want to include some properties of the nested "author" document, use: `/books?properties[]=title&properties[author]=name`.
+コレクションエンドポイントが `/books` である場合、`/books?properties[]=title&properties[]=author` というクエリでシリアライズ プロパティをフィルタリングできます。
+ネストされた "author"ドキュメントのいくつかのプロパティを含めるには、
+`/books?properties[]=title&properties[author]=name`
+を使います。
 
-## Creating Custom Filters
+## カスタムフィルターを作成する
 
-Custom filters can be written by implementing the `ApiPlatform\Core\Api\FilterInterface`
-interface.
+カスタムフィルタは
+`ApiPlatform\Core\Api\FilterInterface`
+インタフェースを実装することで記述できます。
 
-API Platform provides a convenient way to create Doctrine ORM filters. If you use [custom data providers](data-providers.md),
-you can still create filters by implementing the previously mentioned interface, but - as API Platform isn't aware of your
-persistence system's internals - you have to create the filtering logic by yourself.
+APIプラットフォームは、Doctrine ORMフィルタを作成する便利な方法を提供します。
+[カスタムデータプロバイダ](data-providers.md)を使用している場合でも、前述のインターフェイスを実装してフィルタを作成できますが、API Platform は永続システムの内部を認識しないため、自分でフィルタリングロジックを作成する必要があります。
 
-### Creating Custom Doctrine ORM Filters
+### カスタム Doctrine ORM フィルタを作成する
 
-Doctrine filters have access to the HTTP request (Symfony's `Request` object) and to the `QueryBuilder` instance used to
-retrieve data from the database. They are only applied to collections. If you want to deal with the DQL query generated
-to retrieve items, or don't need to access the HTTP request, [extensions](extensions.md) are the way to go.
+Doctrineフィルタは、HTTPリクエスト（Symfonyの `Request`オブジェクト）とデータベースからデータを取得するために使用される `QueryBuilder` インスタンスにアクセスできます。
+それらはコレクションにのみ適用されます。 アイテムを取得するために生成されたDQLクエリを処理する場合、またはHTTPリクエストにアクセスする必要がない場合は、[extensions](extensions.md) を使用します。
 
-A Doctrine ORM filter is basically a class implementing the `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\FilterInterface`.
-API Platform includes a convenient abstract class implementing this interface and providing utility methods: `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\AbstractFilter`
+Doctrine ORMフィルタは基本的に
+`ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\FilterInterface`
+を実装するクラスです。
+APIプラットフォームには、このインタフェースを実装し、ユーティリティメソッドを提供する便利な抽象クラスが含まれています: `ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\AbstractFilter`
 
-In the following example, we create a class to filter a collection by applying a regexp to a property. The `REGEXP` DQL
-function used in this example can be found in the [`DoctrineExtensions`](https://github.com/beberlei/DoctrineExtensions)
-library. This library must be properly installed and registered to use this example (works only with MySQL).
+次の例では、プロパティに正規表現を適用してコレクションをフィルタリングするクラスを作成します。
+この例で使用される `REGEXP` DQL関数は、[`DoctrineExtensions`](https://github.com/beberlei/DoctrineExtensions) ライブラリにあります。
+この例を使用するには、このライブラリを適切にインストールして登録する必要があります（MySQLでのみ動作します）。
 
 ```php
 <?php
@@ -705,7 +709,7 @@ final class RegexpFilter extends AbstractFilter
 }
 ```
 
-Then, register this filter as a service:
+次に、このフィルタをサービスとして登録します。
 
 ```yaml
 # api/config/services.yaml
@@ -716,8 +720,7 @@ services:
         #tags: [ 'api_platform.filter' ]
 ```
 
-In the previous example, the filter can be applied on any property. However, thanks to the `AbstractFilter` class,
-it can also be enabled for some properties:
+前の例では、任意のプロパティにフィルタを適用できます。 しかし、 `AbstractFilter` クラスのおかげで、いくつかのプロパティに対しても有効にすることができます：
 
 ```yaml
 # api/config/services.yaml
@@ -728,7 +731,7 @@ services:
         #tags: [ 'api_platform.filter' ]
 ```
 
-Finally, add this filter to resources you want to be filtered:
+最後に、フィルタリングするリソースにこのフィルタを追加します。
 
 ```php
 <?php
@@ -748,7 +751,7 @@ class Offer
 }
 ```
 
-Or by using the `ApiFilter` annotation:
+あるいは、 `ApiFilter` アノテーションを使って：
 
 ```php
 <?php
@@ -770,17 +773,20 @@ class Offer
 }
 ```
 
-You can now enable this filter using URLs like `http://example.com/offers?regexp_email=^[FOO]`. This new filter will also
-appear in Swagger and Hydra documentations.
+`http://example.com/offers?regexp_email=^[FOO]`.
+のようなURLを使ってこのフィルタを有効にすることができます。
+この新しいフィルターは、SwaggerやHydraの文書にも表示されます。
 
-### Using Doctrine Filters
+### Doctrine フィルターを使う
 
-Doctrine features [a filter system](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/filters.html) that allows the developer to add SQL to the conditional clauses of queries, regardless the place where the SQL is generated (e.g. from a DQL query, or by loading associated entities).
-These are applied on collections and items, so are incredibly useful.
+Doctrine は、開発者がクエリの条件節にSQLを追加できるようにする[フィルタシステム](http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/filters.html)を備えています。
+これらはSQLが生成される場所（DQLクエリや関連エンティティのロードなど）に関係なく、コレクションやアイテムに適用されるため、非常に便利です。
 
-The following information, specific to Doctrine filters in Symfony, is based upon [a great article posted on Michaël Perrin's blog](http://blog.michaelperrin.fr/2014/12/05/doctrine-filters/).
+SymfonyのDoctrineフィルタに固有の以下の情報は、[MichaëlPerrinのブログに投稿された素晴らしい記事](http://blog.michaelperrin.fr/2014/12/05/doctrine-filters/)に基づいています。
 
 Suppose we have a `User` entity and an `Order` entity related to the `User` one. A user should only see his orders and no others's ones.
+`User` エンティティと `User` エンティティに関連する `Order` エンティティがあるとします。
+ユーザーは自分の注文のみを表示し、他のユーザーは表示しません。
 
 ```php
 <?php
@@ -823,9 +829,9 @@ class Order
 }
 ```
 
-The whole idea is that any query on the order table should add a WHERE user_id = :user_id condition.
+全体のアイデアは、注文テーブルのどのクエリでも `WHERE user_id =：user_id` という条件を追加する必要があるということです。
 
-Start by creating a custom annotation to mark restricted entities:
+まず制限付きエンティティをマークするためのカスタムアノテーションを作成します。
 
 ```php
 <?php
@@ -845,7 +851,7 @@ final class UserAware
 }
 ```
 
-Then, let's mark the `Order` entity as a "user aware" entity.
+次に、 `Order` エンティティを 「User を理解する」エンティティとしてマークしましょう。
 
 ```php
 <?php
@@ -863,7 +869,7 @@ class Order {
 }
 ```
 
-Now, create a Doctrine filter class:
+ここで、Doctrineフィルタクラスを作成します。
 
 ```php
 <?php
@@ -916,7 +922,7 @@ final class UserFilter extends SQLFilter
 }
 ```
 
-Now, we must configure the Doctrine filter.
+ここで、Doctrine フィルタを設定する必要があります。
 
 ```yaml
 # api/config/packages/api_platform.yaml
@@ -927,7 +933,7 @@ doctrine:
                 class: App\Filter\UserFilter
 ```
 
-And add a listener for every request that initializes the Doctrine filter with the current user in your bundle services declaration file.
+そして、リクエストごとにバンドルサービス宣言ファイルを現在のユーザで Doctrine フィルタを初期化するリスナーを追加します。
 
 ```yaml
 # api/config/services.yaml
@@ -940,9 +946,10 @@ services:
         autoconfigure: false
 ```
 
-It's key to set the priority higher than the `ApiPlatform\Core\EventListener\ReadListener`'s priority, as flagged in [this issue](https://github.com/api-platform/core/issues/1185), as otherwise the `PaginatorExtension` will ignore the Doctrine filter and return incorrect `totalItems` and `page` (first/last/next) data.
+[この問題](https://github.com/api-platform/core/issues/1185)にフラグが立てられているように、優先順位を `ApiPlatform\Core\EventListener\ReadListener` の優先順位より高く設定することは重要です。
+さもなくば `PaginatorExtension` はDoctrineフィルタを無視し、不正な` totalItems`と `page`（first/last/next）データを返します。
 
-Lastly, implement the configurator class:
+最後に、コンフィギュレータクラスを実装します。
 
 ```php
 <?php
@@ -991,14 +998,14 @@ final class UserFilterConfigurator
 }
 ```
 
-Done: Doctrine will automatically filter all "UserAware" entities!
+完了：Doctrineはすべての "UserAware"エンティティを自動的にフィルタリングします！
 
-### Overriding Extraction of Properties from the Request
+### リクエストのプロパティ抽出をオーバーライドする
 
-You can change the way the filter parameters are extracted from the request. This can be done by overriding the `extractProperties(\Symfony\Component\HttpFoundation\Request $request)`
-method.
+リクエストからフィルタパラメータを抽出する方法を変更することができます。
+これは、 `extractProperties(\Symfony\Component\HttpFoundation\Request $request)` メソッドをオーバーライドすることで行うことができます。
 
-In the following example, we will completely change the syntax of the order filter to be the following: `?filter[order][property]`
+次の例では、order フィルタの構文を完全に変更して次のようにします： `?filter[order][property]`
 
 ```php
 <?php
@@ -1018,7 +1025,7 @@ final class CustomOrderFilter extends OrderFilter
 }
 ```
 
-Finally, register the custom filter:
+最後に、カスタムフィルタを登録します。
 
 ```yaml
 # api/config/services.yaml
@@ -1029,11 +1036,12 @@ services:
         #tags: [ 'api_platform.filter' ]
 ```
 
-## ApiFilter Annotation
+## ApiFilter アノテーション
 
-The annotation can be used on a `property` or on a `class`.
+アノテーションは `property` や `class` で使用できます。
 
-If the annotation is given over a property, the filter will be configured on the property. For example, let's add a search filter on `name` and on the `prop` property of the `colors` relation:
+アノテーションがプロパティに与えられている場合、そのプロパティにフィルタが設定されます。
+例えば、 `name` や ` colors` リレーションの `prop` プロパティに検索フィルタを追加しましょう：
 
 ```php
 <?php
@@ -1072,22 +1080,24 @@ class DummyCar
 
 ```
 
-On the first property, `name`, it's straightforward. The first annotation argument is the filter class, the second specifies options, here the strategy:
-
+最初のプロパティ `name` は、簡単です。
+最初のアノテーション引数はフィルタクラス、2番目のオプションを指定します。ここでは strategy です：
 ```
 @ApiFilter(SearchFilter::class, strategy="partial")
 ```
 
-The second annotation, we specify `properties` on which the filter should apply. It's necessary here because we don't want to filter `colors` but the property `prop` of the `colors` association.
-Note that for each given property we specify the strategy:
+2番目の注釈では、フィルタを適用する `properties` を指定します。
+`colors` をフィルタリングするのではなく、` colors` リレーションのプロパティ `prop` をフィルタリングしたいので、必要になります。
+与えられたプロパティごとに strategy を指定することに注意してください。
 
 ```
 @ApiFilter(SearchFilter::class, properties={"colors.prop": "ipartial"})
 ```
 
-The `ApiFilter` annotation can be set on the class as well. If you don't specify any properties, it'll act on every property of the class.
+`ApiFilter` アノテーションもクラスで設定できます。
+プロパティを指定しないと、クラスのすべてのプロパティに作用します。
 
-For example, let's define three data filters (`DateFilter`, `SearchFilter` and `BooleanFilter`) and two serialization filters (`PropertyFilter` and `GroupFilter`) on our `DummyCar` class:
+例えば、3つのデータフィルタ（ `DateFilter`、` SearchFilter`と `BooleanFilter`）と` DummyCar` クラスの2つのシリアライズ フィルタ（`PropertyFilter` と ` GroupFilter`）を定義しましょう：
 
 ```php
 <?php
@@ -1120,27 +1130,29 @@ class DummyCar
 
 ```
 
-The `BooleanFilter` is applied to every `Boolean` property of the class. Indeed, in each core filters we check the Doctrine type. It's written only by using the filter class:
+`BooleanFilter` はクラスのすべての ` Boolean` プロパティに適用されます。
+実際、各コアフィルタでは、Doctrine 型をチェックします。
+これは、フィルタークラスを使用してのみ記述されます。
 
 ```
 @ApiFilter(BooleanFilter::class)
 ```
 
-The `DateFilter` given here will be applied to every `Date` property of the class `DummyCar` with the `DateFilter::EXCLUDE_NULL` strategy:
+ここに与えられた `DateFilter` は ` DummyCar` クラスの `Date` プロパティに ` DateFilter::EXCLUDE_NULL` ストラテジーで適用されます：
 
 ```
 @ApiFilter(DateFilter::class, strategy=DateFilter::EXCLUDE_NULL)
 ```
 
-The `SearchFilter` here adds properties. The result is the exact same as the example with annotations on properties:
+ここの `SearchFilter` はプロパティを追加します。 結果は、プロパティの注釈を使用した例とまったく同じです。
 
 ```
 @ApiFilter(SearchFilter::class, properties={"colors.prop": "ipartial", "name": "partial"})
 ```
 
-Note that you can specify the `properties` argument on every filter.
+すべてのフィルタで `properties` 引数を指定できることに注意してください。
 
-The next filters are not related to how the data is fetched but rather on the how the serialization is done on those, we can give an `arguments` option ([see here for the available arguments](#serializer-filters)):
+次のフィルタは、データの取り込み方法とは関係なく、シリアライズの方法に関係なく、 `arguments` オプション（[利用可能な引数についてはこちらを参照してください](#serializer-filters)を与えることができます。
 
 ```
 @ApiFilter(PropertyFilter::class, arguments={"parameterName": "foobar"})
